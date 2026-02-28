@@ -1,0 +1,41 @@
+{
+    "name": "openjobspec/laravel",
+    "description": "Laravel integration for Open Job Spec (OJS)",
+    "type": "library",
+    "license": "Apache-2.0",
+    "keywords": ["laravel", "background-jobs", "job-queue", "openjobspec", "ojs"],
+    "homepage": "https://openjobspec.org",
+    "require": {
+        "php": ">=8.2",
+        "openjobspec/sdk": "^1.0",
+        "illuminate/support": "^11.0",
+        "illuminate/console": "^11.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.0",
+        "orchestra/testbench": "^9.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "OpenJobSpec\\Laravel\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "OpenJobSpec\\Laravel\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "OpenJobSpec\\Laravel\\OjsServiceProvider"
+            ],
+            "aliases": {
+                "Ojs": "OpenJobSpec\\Laravel\\Facades\\Ojs"
+            }
+        }
+    },
+    "config": {
+        "sort-packages": true
+    }
+}
