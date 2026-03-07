@@ -100,4 +100,3 @@ php bin/console ojs:purge --queue=default --force
 ## License
 
 Apache-2.0
-
