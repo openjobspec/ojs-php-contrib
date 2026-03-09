@@ -24,4 +24,3 @@ Each package provides idiomatic integration between the OJS PHP SDK and a popula
 ## License
 
 Apache-2.0
-
