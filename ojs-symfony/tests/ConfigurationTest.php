@@ -92,4 +92,109 @@ class ConfigurationTest extends TestCase
 
         $this->assertSame('ojs', $treeBuilder->buildTree()->getName());
     }
+
+    public function testDefaultEncryptionDisabled(): void
+    {
+        $configuration = new Configuration();
+        $processor = new Processor();
+        $config = $processor->processConfiguration($configuration, []);
+
+        $this->assertArrayHasKey('encryption', $config);
+        $this->assertFalse($config['encryption']['enabled']);
+    }
+
+    public function testDefaultEventsDisabled(): void
+    {
+        $configuration = new Configuration();
+        $processor = new Processor();
+        $config = $processor->processConfiguration($configuration, []);
+
+        $this->assertArrayHasKey('events', $config);
+        $this->assertFalse($config['events']['enabled']);
+    }
+
+    public function testDefaultHealthDisabled(): void
+    {
+        $configuration = new Configuration();
+        $processor = new Processor();
+        $config = $processor->processConfiguration($configuration, []);
+
+        $this->assertArrayHasKey('health', $config);
+        $this->assertFalse($config['health']['enabled']);
+    }
+
+    public function testDefaultMessengerDisabled(): void
+    {
+        $configuration = new Configuration();
+        $processor = new Processor();
+        $config = $processor->processConfiguration($configuration, []);
+
+        $this->assertArrayHasKey('messenger', $config);
+        $this->assertFalse($config['messenger']['enabled']);
+    }
+
+    public function testEncryptionConfiguration(): void
+    {
+        $configuration = new Configuration();
+        $processor = new Processor();
+        $config = $processor->processConfiguration($configuration, [[
+            'encryption' => [
+                'enabled' => true,
+                'current_key_id' => 'v1',
+                'keys' => ['v1' => 'abcdef1234567890abcdef1234567890'],
+            ],
+        ]]);
+
+        $this->assertTrue($config['encryption']['enabled']);
+        $this->assertSame('v1', $config['encryption']['current_key_id']);
+        $this->assertArrayHasKey('v1', $config['encryption']['keys']);
+    }
+
+    public function testEventsEnabled(): void
+    {
+        $configuration = new Configuration();
+        $processor = new Processor();
+        $config = $processor->processConfiguration($configuration, [[
+            'events' => ['enabled' => true],
+        ]]);
+
+        $this->assertTrue($config['events']['enabled']);
+    }
+
+    public function testHealthEnabled(): void
+    {
+        $configuration = new Configuration();
+        $processor = new Processor();
+        $config = $processor->processConfiguration($configuration, [[
+            'health' => ['enabled' => true],
+        ]]);
+
+        $this->assertTrue($config['health']['enabled']);
+    }
+
+    public function testMessengerConfiguration(): void
+    {
+        $configuration = new Configuration();
+        $processor = new Processor();
+        $config = $processor->processConfiguration($configuration, [[
+            'messenger' => [
+                'enabled' => true,
+                'queue' => 'emails',
+            ],
+        ]]);
+
+        $this->assertTrue($config['messenger']['enabled']);
+        $this->assertSame('emails', $config['messenger']['queue']);
+    }
+
+    public function testMessengerDefaultQueue(): void
+    {
+        $configuration = new Configuration();
+        $processor = new Processor();
+        $config = $processor->processConfiguration($configuration, [[
+            'messenger' => ['enabled' => true],
+        ]]);
+
+        $this->assertSame('default', $config['messenger']['queue']);
+    }
 }

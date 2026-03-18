@@ -133,4 +133,150 @@ class OjsExtensionTest extends TestCase
         $def = $container->getDefinition('OpenJobSpec\Worker');
         $this->assertTrue($def->isPublic());
     }
+
+    public function testLoadRegistersWorkflowFactory(): void
+    {
+        $container = new ContainerBuilder();
+        $extension = new OjsExtension();
+
+        $extension->load([], $container);
+
+        $this->assertTrue(
+            $container->hasDefinition('OpenJobSpec\Symfony\Workflow\WorkflowFactory'),
+            'WorkflowFactory service should be registered'
+        );
+        $this->assertTrue($container->hasAlias('ojs.workflow'));
+    }
+
+    public function testLoadRegistersCronManager(): void
+    {
+        $container = new ContainerBuilder();
+        $extension = new OjsExtension();
+
+        $extension->load([], $container);
+
+        $this->assertTrue(
+            $container->hasDefinition('OpenJobSpec\Symfony\Scheduling\CronManager'),
+            'CronManager service should be registered'
+        );
+        $this->assertTrue($container->hasAlias('ojs.cron'));
+    }
+
+    public function testLoadRegistersCronCommand(): void
+    {
+        $container = new ContainerBuilder();
+        $extension = new OjsExtension();
+
+        $extension->load([], $container);
+
+        $this->assertTrue(
+            $container->hasDefinition('OpenJobSpec\Symfony\Command\CronCommand'),
+            'CronCommand should be registered'
+        );
+    }
+
+    public function testEncryptionServicesNotRegisteredByDefault(): void
+    {
+        $container = new ContainerBuilder();
+        $extension = new OjsExtension();
+
+        $extension->load([], $container);
+
+        $this->assertFalse($container->hasDefinition('OpenJobSpec\Symfony\Encryption\SymfonyKeyProvider'));
+        $this->assertFalse($container->hasDefinition('OpenJobSpec\EncryptionCodec'));
+        $this->assertFalse($container->hasDefinition('OpenJobSpec\EncryptionMiddleware'));
+    }
+
+    public function testEncryptionServicesRegisteredWhenEnabled(): void
+    {
+        $container = new ContainerBuilder();
+        $extension = new OjsExtension();
+
+        $extension->load([[
+            'encryption' => [
+                'enabled' => true,
+                'current_key_id' => 'v1',
+                'keys' => ['v1' => str_repeat('a', 64)],
+            ],
+        ]], $container);
+
+        $this->assertTrue($container->hasDefinition('OpenJobSpec\Symfony\Encryption\SymfonyKeyProvider'));
+        $this->assertTrue($container->hasAlias('ojs.encryption.key_provider'));
+        $this->assertTrue($container->hasDefinition('OpenJobSpec\EncryptionCodec'));
+        $this->assertTrue($container->hasAlias('ojs.encryption.codec'));
+        $this->assertTrue($container->hasDefinition('OpenJobSpec\EncryptionMiddleware'));
+        $this->assertTrue($container->hasAlias('ojs.encryption.middleware'));
+    }
+
+    public function testEventListenerNotRegisteredByDefault(): void
+    {
+        $container = new ContainerBuilder();
+        $extension = new OjsExtension();
+
+        $extension->load([], $container);
+
+        $this->assertFalse($container->hasDefinition('OpenJobSpec\Symfony\EventDispatcher\OjsEventListener'));
+    }
+
+    public function testEventListenerRegisteredWhenEnabled(): void
+    {
+        $container = new ContainerBuilder();
+        $extension = new OjsExtension();
+
+        $extension->load([[
+            'events' => ['enabled' => true],
+        ]], $container);
+
+        $this->assertTrue($container->hasDefinition('OpenJobSpec\Symfony\EventDispatcher\OjsEventListener'));
+        $this->assertTrue($container->hasAlias('ojs.event_listener'));
+    }
+
+    public function testHealthCheckNotRegisteredByDefault(): void
+    {
+        $container = new ContainerBuilder();
+        $extension = new OjsExtension();
+
+        $extension->load([], $container);
+
+        $this->assertFalse($container->hasDefinition('OpenJobSpec\Symfony\Health\OjsHealthCheck'));
+    }
+
+    public function testHealthCheckRegisteredWhenEnabled(): void
+    {
+        $container = new ContainerBuilder();
+        $extension = new OjsExtension();
+
+        $extension->load([[
+            'health' => ['enabled' => true],
+        ]], $container);
+
+        $this->assertTrue($container->hasDefinition('OpenJobSpec\Symfony\Health\OjsHealthCheck'));
+        $this->assertTrue($container->hasAlias('ojs.health'));
+    }
+
+    public function testMessengerNotRegisteredByDefault(): void
+    {
+        $container = new ContainerBuilder();
+        $extension = new OjsExtension();
+
+        $extension->load([], $container);
+
+        $this->assertFalse($container->hasDefinition('OpenJobSpec\Symfony\Messenger\OjsTransport'));
+        $this->assertFalse($container->hasDefinition('OpenJobSpec\Symfony\Messenger\OjsTransportFactory'));
+    }
+
+    public function testMessengerRegisteredWhenEnabled(): void
+    {
+        $container = new ContainerBuilder();
+        $extension = new OjsExtension();
+
+        $extension->load([[
+            'messenger' => ['enabled' => true],
+        ]], $container);
+
+        $this->assertTrue($container->hasDefinition('OpenJobSpec\Symfony\Messenger\OjsTransport'));
+        $this->assertTrue($container->hasAlias('ojs.messenger.transport'));
+        $this->assertTrue($container->hasDefinition('OpenJobSpec\Symfony\Messenger\OjsTransportFactory'));
+        $this->assertTrue($container->hasAlias('ojs.messenger.transport_factory'));
+    }
 }
