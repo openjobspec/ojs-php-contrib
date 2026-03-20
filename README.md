@@ -1,4 +1,5 @@
 # OJS PHP Contrib
+[![Stability: beta](https://img.shields.io/badge/stability-beta-yellow.svg)](https://github.com/openjobspec/openjobspec/blob/main/STABILITY.md)
 
 Framework integrations for the [OJS PHP SDK](https://github.com/openjobspec/ojs-php-sdk).
 
