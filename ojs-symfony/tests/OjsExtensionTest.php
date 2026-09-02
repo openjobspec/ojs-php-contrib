@@ -279,4 +279,36 @@ class OjsExtensionTest extends TestCase
         $this->assertTrue($container->hasDefinition('OpenJobSpec\Symfony\Messenger\OjsTransportFactory'));
         $this->assertTrue($container->hasAlias('ojs.messenger.transport_factory'));
     }
+
+    public function testAllOptInServicesRegisterTogether(): void
+    {
+        $container = new ContainerBuilder();
+        $extension = new OjsExtension();
+
+        $extension->load([[
+            'encryption' => [
+                'enabled' => true,
+                'current_key_id' => 'v1',
+                'keys' => ['v1' => str_repeat('a', 64)],
+            ],
+            'events' => ['enabled' => true],
+            'health' => ['enabled' => true],
+            'messenger' => ['enabled' => true],
+        ]], $container);
+
+        // Always-on services remain registered alongside the opt-in ones.
+        $this->assertTrue($container->hasDefinition('OpenJobSpec\Client'));
+        $this->assertTrue($container->hasDefinition('OpenJobSpec\Worker'));
+        $this->assertTrue($container->hasDefinition('OpenJobSpec\Symfony\Workflow\WorkflowFactory'));
+        $this->assertTrue($container->hasDefinition('OpenJobSpec\Symfony\Scheduling\CronManager'));
+        $this->assertTrue($container->hasDefinition('OpenJobSpec\Symfony\Command\CronCommand'));
+
+        // Every opt-in group registers when all flags are enabled at once.
+        $this->assertTrue($container->hasDefinition('OpenJobSpec\Symfony\Encryption\SymfonyKeyProvider'));
+        $this->assertTrue($container->hasDefinition('OpenJobSpec\EncryptionMiddleware'));
+        $this->assertTrue($container->hasDefinition('OpenJobSpec\Symfony\EventDispatcher\OjsEventListener'));
+        $this->assertTrue($container->hasDefinition('OpenJobSpec\Symfony\Health\OjsHealthCheck'));
+        $this->assertTrue($container->hasDefinition('OpenJobSpec\Symfony\Messenger\OjsTransport'));
+        $this->assertTrue($container->hasDefinition('OpenJobSpec\Symfony\Messenger\OjsTransportFactory'));
+    }
 }
