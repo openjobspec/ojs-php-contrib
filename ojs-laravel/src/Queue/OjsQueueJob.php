@@ -22,10 +22,11 @@ class OjsQueueJob extends BaseJob implements JobContract
         Container $container,
         private readonly Client $client,
         private readonly OjsJob $ojsJob,
-        private readonly string $connectionName,
-        private readonly string $queueName,
+        string $connectionName,
+        string $queueName,
     ) {
         $this->container = $container;
+        $this->connectionName = $connectionName;
         $this->queue = $queueName;
     }
 
@@ -81,7 +82,7 @@ class OjsQueueJob extends BaseJob implements JobContract
      */
     public function getQueue(): string
     {
-        return $this->queueName;
+        return $this->queue;
     }
 
     /**
