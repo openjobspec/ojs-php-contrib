@@ -1,5 +1,9 @@
 # Dependencies
 /vendor/
+/ojs-*/vendor/
+/.deps/
+/.consumer-*/
+/.certification-relocated/
 
 # PHPUnit
 .phpunit.result.cache
