@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: ${{ matrix.package }} / PHP ${{ matrix.php-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ["8.2", "8.3", "8.4"]
+        package: [ojs-laravel, ojs-symfony]
+
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - name: Check out the coordinated SDK source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          repository: openjobspec/ojs-php-sdk
+          ref: main
+          path: .deps/ojs-php-sdk
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: curl, json
+          tools: composer:v2
+
+      - name: Validate package metadata
+        working-directory: ${{ matrix.package }}
+        run: composer validate --strict
+
+      - name: Install dependencies
+        working-directory: ${{ matrix.package }}
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Run tests
+        working-directory: ${{ matrix.package }}
+        run: vendor/bin/phpunit --testdox
+
+      - name: Syntax check
+        working-directory: ${{ matrix.package }}
+        run: find src tests -name '*.php' -print0 | xargs -0 -n1 php -l
+
+      - name: Build package archive
+        if: matrix.php-version == '8.3'
+        working-directory: ${{ matrix.package }}
+        run: COMPOSER_ROOT_VERSION=0.5.0 composer archive --format=zip --dir=dist
+
+      - name: Smoke-test in a clean consumer project
+        if: matrix.php-version == '8.3'
+        working-directory: ${{ matrix.package }}
+        env:
+          PACKAGE_NAME: ${{ matrix.package == 'ojs-laravel' && 'openjobspec/laravel' || 'openjobspec/symfony' }}
+        run: |
+          CONSUMER_DIR="$GITHUB_WORKSPACE/.consumer-${{ matrix.package }}"
+          mkdir -p "$CONSUMER_DIR"
+          printf '%s\n' \
+            '{"name":"openjobspec/contrib-consumer-smoke","repositories":[' \
+            '{"type":"path","url":"'"$GITHUB_WORKSPACE"'/${{ matrix.package }}","options":{"symlink":false,"versions":{"'"$PACKAGE_NAME"'":"0.5.0"}}},' \
+            '{"type":"path","url":"'"$GITHUB_WORKSPACE"'/.deps/ojs-php-sdk","options":{"symlink":false,"versions":{"openjobspec/sdk":"0.5.0"}}}' \
+            '],"require":{}}' > "$CONSUMER_DIR/composer.json"
+          composer require --working-dir="$CONSUMER_DIR" "$PACKAGE_NAME:0.5.0" --no-interaction --no-progress
+          if [ "${{ matrix.package }}" = "ojs-laravel" ]; then
+            CONSUMER_DIR="$CONSUMER_DIR" php -r 'require getenv("CONSUMER_DIR") . "/vendor/autoload.php"; if (!class_exists(OpenJobSpec\Laravel\OjsServiceProvider::class)) { exit(1); }'
+          else
+            CONSUMER_DIR="$CONSUMER_DIR" php -r 'require getenv("CONSUMER_DIR") . "/vendor/autoload.php"; if (!class_exists(OpenJobSpec\Symfony\OjsBundle::class)) { exit(1); }'
+          fi
