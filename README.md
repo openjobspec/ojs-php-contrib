@@ -1,5 +1,6 @@
 # OJS PHP Contrib
-[![Stability: beta](https://img.shields.io/badge/stability-beta-yellow.svg)](https://github.com/openjobspec/openjobspec/blob/main/STABILITY.md)
+[![Stability: beta](https://img.shields.io/badge/stability-beta-yellow.svg)](https://openjobspec.org)
+[![CI](https://github.com/openjobspec/ojs-php-contrib/actions/workflows/ci.yml/badge.svg)](https://github.com/openjobspec/ojs-php-contrib/actions/workflows/ci.yml)
 
 Framework integrations for the [OJS PHP SDK](https://github.com/openjobspec/ojs-php-sdk).
 
@@ -7,7 +8,7 @@ Framework integrations for the [OJS PHP SDK](https://github.com/openjobspec/ojs-
 
 | Package | Framework | Status | Install |
 |---------|-----------|--------|---------|
-| [ojs-laravel](./ojs-laravel/) | Laravel 11+ | Beta | `composer require openjobspec/laravel` |
+| [ojs-laravel](./ojs-laravel/) | Laravel 12+ | Beta | `composer require openjobspec/laravel` |
 | [ojs-symfony](./ojs-symfony/) | Symfony 7+ | Beta | `composer require openjobspec/symfony` |
 
 > **Status: Beta** — Core functionality (enqueue, worker, transactional enqueue) is stable and tested.
@@ -70,7 +71,11 @@ class OrderService
 ## Requirements
 
 - PHP 8.2+
-- [openjobspec/sdk](https://packagist.org/packages/openjobspec/sdk) ^1.0
+- [openjobspec/sdk](https://github.com/openjobspec/ojs-php-sdk) ^0.5
+
+Laravel 12 is the minimum supported Laravel release for OJS PHP Contrib 0.5.0.
+Laravel 11 was removed from the compatibility window because its remaining
+Testbench 9 dependency set is blocked by active Composer security advisories.
 
 ## License
 
