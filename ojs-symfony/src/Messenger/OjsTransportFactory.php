@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OpenJobSpec\Symfony\Messenger;
 
 use OpenJobSpec\Client;
+use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 use Symfony\Component\Messenger\Transport\TransportFactoryInterface;
 use Symfony\Component\Messenger\Transport\TransportInterface;
 
@@ -21,8 +22,11 @@ class OjsTransportFactory implements TransportFactoryInterface
     ) {
     }
 
-    public function createTransport(#[\SensitiveParameter] string $dsn, array $options): TransportInterface
-    {
+    public function createTransport(
+        #[\SensitiveParameter] string $dsn,
+        array $options,
+        SerializerInterface $serializer,
+    ): TransportInterface {
         $parsedUrl = parse_url($dsn);
         $host = $parsedUrl['host'] ?? 'localhost';
         $port = $parsedUrl['port'] ?? 8080;

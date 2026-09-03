@@ -2,23 +2,18 @@
 
 declare(strict_types=1);
 
-namespace OpenJobSpec\Laravel\Tests;
+namespace OpenJobSpec\Laravel\Tests {
 
 use OpenJobSpec\Laravel\Encryption\LaravelKeyProvider;
 use OpenJobSpec\KeyProvider;
-use PHPUnit\Framework\TestCase;
+use Orchestra\Testbench\TestCase;
 
 class LaravelKeyProviderTest extends TestCase
 {
-    /**
-     * Simulate Laravel's config() helper for tests.
-     */
     protected function setUp(): void
     {
-        // Define config() function if not defined (outside Laravel)
-        if (!function_exists('config')) {
-            // Already defined below in the global namespace
-        }
+        parent::setUp();
+        config()->set('app.key', 'base64:' . base64_encode(random_bytes(32)));
     }
 
     public function testClassExists(): void
@@ -37,7 +32,7 @@ class LaravelKeyProviderTest extends TestCase
         $key = random_bytes(32);
         $provider = new LaravelKeyProvider(['test' => $key]);
 
-        $this->assertSame($key, $provider->getKey('default'));
+        $this->assertSame($key, $provider->getKey('test'));
     }
 
     public function testGetKeyThrowsForUnknownKeyId(): void
@@ -100,26 +95,4 @@ class LaravelKeyProviderTest extends TestCase
     }
 }
 
-/**
- * Stub config() helper for tests running outside Laravel.
- */
-namespace OpenJobSpec\Laravel\Encryption;
-
-if (!function_exists('OpenJobSpec\\Laravel\\Encryption\\config')) {
-    // The LaravelKeyProvider uses config('app.key', '') which resolves
-    // via the global config() helper. We need the real namespace-level
-    // function to exist for the class to load properly.
-}
-
-namespace {
-    if (!function_exists('config')) {
-        function config(string $key = '', mixed $default = null): mixed
-        {
-            // Return a fake APP_KEY for testing
-            return match ($key) {
-                'app.key' => 'base64:' . base64_encode(random_bytes(32)),
-                default => $default,
-            };
-        }
-    }
 }

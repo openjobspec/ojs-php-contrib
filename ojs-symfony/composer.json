@@ -5,9 +5,30 @@
     "license": "Apache-2.0",
     "keywords": ["symfony", "background-jobs", "job-queue", "openjobspec", "ojs"],
     "homepage": "https://openjobspec.org",
+    "authors": [
+        {
+            "name": "OpenJobSpec Contributors"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/openjobspec/ojs-php-contrib/issues",
+        "source": "https://github.com/openjobspec/ojs-php-contrib/tree/main/ojs-symfony"
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../.deps/ojs-php-sdk",
+            "options": {
+                "symlink": false,
+                "versions": {
+                    "openjobspec/sdk": "0.5.0"
+                }
+            }
+        }
+    ],
     "require": {
         "php": ">=8.2",
-        "openjobspec/sdk": "^0.2",
+        "openjobspec/sdk": "^0.5",
         "symfony/framework-bundle": "^7.0",
         "symfony/console": "^7.0",
         "symfony/dependency-injection": "^7.0",
@@ -27,8 +48,11 @@
             "OpenJobSpec\\Symfony\\Tests\\": "tests/"
         }
     },
+    "scripts": {
+        "test": "phpunit --colors=always"
+    },
     "config": {
+        "allow-plugins": {},
         "sort-packages": true
     }
 }
-

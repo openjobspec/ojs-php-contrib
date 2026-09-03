@@ -1,6 +1,6 @@
 # OJS Laravel
 
-Laravel 11+ integration for [Open Job Spec](https://openjobspec.org).
+Laravel 12+ integration for [Open Job Spec](https://openjobspec.org).
 
 ## Installation
 

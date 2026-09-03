@@ -6,6 +6,7 @@ namespace OpenJobSpec\Symfony\Tests;
 
 use OpenJobSpec\Symfony\Messenger\OjsTransportFactory;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 use Symfony\Component\Messenger\Transport\TransportFactoryInterface;
 
 class OjsTransportFactoryTest extends TestCase
@@ -42,7 +43,11 @@ class OjsTransportFactoryTest extends TestCase
     public function testCreateTransportReturnOjsTransport(): void
     {
         $factory = new OjsTransportFactory();
-        $transport = $factory->createTransport('ojs://localhost:8080?queue=test', []);
+        $transport = $factory->createTransport(
+            'ojs://localhost:8080?queue=test',
+            [],
+            $this->createMock(SerializerInterface::class),
+        );
 
         $this->assertInstanceOf(
             \OpenJobSpec\Symfony\Messenger\OjsTransport::class,
@@ -53,11 +58,15 @@ class OjsTransportFactoryTest extends TestCase
     public function testCreateTransportWithOptions(): void
     {
         $factory = new OjsTransportFactory();
-        $transport = $factory->createTransport('ojs://custom:9090', [
-            'queue' => 'high-priority',
-            'auth_token' => 'secret',
-            'timeout' => 60,
-        ]);
+        $transport = $factory->createTransport(
+            'ojs://custom:9090',
+            [
+                'queue' => 'high-priority',
+                'auth_token' => 'secret',
+                'timeout' => 60,
+            ],
+            $this->createMock(SerializerInterface::class),
+        );
 
         $this->assertInstanceOf(
             \OpenJobSpec\Symfony\Messenger\OjsTransport::class,
@@ -71,7 +80,11 @@ class OjsTransportFactoryTest extends TestCase
         $client = new \OpenJobSpec\Client('http://fake', ['transport' => $fakeTransport]);
 
         $factory = new OjsTransportFactory($client);
-        $transport = $factory->createTransport('ojs://ignored:1234', []);
+        $transport = $factory->createTransport(
+            'ojs://ignored:1234',
+            [],
+            $this->createMock(SerializerInterface::class),
+        );
 
         $this->assertInstanceOf(
             \OpenJobSpec\Symfony\Messenger\OjsTransport::class,
