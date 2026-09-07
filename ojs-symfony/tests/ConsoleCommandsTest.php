@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OpenJobSpec\Symfony\Tests;
 
+use OpenJobSpec\Symfony\Command\CronCommand;
 use OpenJobSpec\Symfony\Command\WorkCommand;
 use OpenJobSpec\Symfony\Command\StatusCommand;
 use OpenJobSpec\Symfony\Command\PurgeCommand;
@@ -76,9 +77,30 @@ class ConsoleCommandsTest extends TestCase
         $this->assertSame('ojs:purge', $instance->name);
     }
 
+    public function testCronCommandExists(): void
+    {
+        $this->assertTrue(class_exists(CronCommand::class));
+    }
+
+    public function testCronCommandExtendsCommand(): void
+    {
+        $ref = new \ReflectionClass(CronCommand::class);
+        $this->assertTrue($ref->isSubclassOf(Command::class));
+    }
+
+    public function testCronCommandHasAsCommandAttribute(): void
+    {
+        $ref = new \ReflectionClass(CronCommand::class);
+        $attrs = $ref->getAttributes(\Symfony\Component\Console\Attribute\AsCommand::class);
+
+        $this->assertCount(1, $attrs);
+        $instance = $attrs[0]->newInstance();
+        $this->assertSame('ojs:cron', $instance->name);
+    }
+
     public function testAllCommandsHaveExecuteMethod(): void
     {
-        foreach ([WorkCommand::class, StatusCommand::class, PurgeCommand::class] as $class) {
+        foreach ([WorkCommand::class, StatusCommand::class, PurgeCommand::class, CronCommand::class] as $class) {
             $ref = new \ReflectionClass($class);
             $this->assertTrue(
                 $ref->hasMethod('execute'),
@@ -89,7 +111,7 @@ class ConsoleCommandsTest extends TestCase
 
     public function testAllCommandsRequireConstructorDependencies(): void
     {
-        foreach ([WorkCommand::class, StatusCommand::class, PurgeCommand::class] as $class) {
+        foreach ([WorkCommand::class, StatusCommand::class, PurgeCommand::class, CronCommand::class] as $class) {
             $ref = new \ReflectionClass($class);
             $constructor = $ref->getConstructor();
             $this->assertNotNull($constructor, "{$class} should have a constructor");
